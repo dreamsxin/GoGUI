@@ -1,0 +1,74 @@
+<!doctype html>
+<html>
+	<head>
+		<title>六六</title>
+		<link rel="shortcut icon" href="favicon.png">
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="css/bootstrap.min.css">
+
+    <script src="js/jquery-3.3.1.slim.min.js"></script>
+    <script src="js/popper.min.js"></script>
+    <script src="js/bootstrap.min.js"></script>
+	</head>
+	<body onload=start()>
+	<div class="container-fluid mt-2">
+		<div class="row">
+			<div class="col">
+				<div class="card">
+					<div class="card-header">Excel 文件比较</div>
+					<div class="card-body">
+							<div class="form-group">
+								<div class="custom-file">
+									<label for="exampleFormControlFile1">文件路径</label>
+									<input type="text" class="form-control-file" id="file1">
+								</div>
+							</div>
+							<div class="form-group">
+								<label>对比列号</label>
+								<input type="number" id="col1" class="form-control" value="0">
+							</div>
+							<div class="form-group">
+								<div class="custom-file">
+									<label for="exampleFormControlFile2">次文件</label>
+									<input type="text" class="form-control-file" id="file2">
+								</div>
+							</div>
+							<div class="form-group">
+								<label>对比列号</label>
+								<input type="number" id="col2" class="form-control" value="0">
+							</div>
+							<button id="btn_submit" type="submit" class="btn btn-primary">更新</button>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+
+		<!-- Connect UI actions to Go functions -->
+		<script>
+			function getObjectURL(file) {
+				var reader = new FileReader();
+				reader.readAsDataURL(file);
+				reader.onloadend = function(e) {
+					alert(e.target.result);
+				}
+			}
+			$('#btn_submit').click(async () => {
+				var file1 = $('#file1').val();
+				var file2 = $('#file2').val();
+				var col1 = Number($('#col1').val());
+				var col2 = Number($('#col2').val());
+				if (!file1 || !file2)
+				{
+					alert('请填写文件路径');
+					return;
+				}
+				$('#btn_submit').text('处理中...');
+				alert(await excel_diff($('#file1').val(), $('#file2').val(), col1, col2)); // Call Go function
+				$('#btn_submit').text('完成');
+			});
+
+		</script>
+	</body>
+</html>
