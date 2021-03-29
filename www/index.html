@@ -12,8 +12,10 @@
     <script src="js/popper.min.js"></script>
   <script src="js/vue.min.js"></script>
   <script src="js/bootstrap-vue.min.js"></script>
-
   <script src="js/bootstrap-vue-icons.min.js"></script>
+
+	<script src="js/vue-treeselect.umd.min.js"></script>
+  <link rel="stylesheet" href="css/vue-treeselect.min.css">
 	</head>
 	<body onload="start()">
 	<div class="container-fluid mt-2" id="app">
@@ -21,24 +23,40 @@
       <b-form-group label="选择磁盘">
 				<b-form-select v-model="selectedDrive" :options="drives"></b-form-select>
       </b-form-group>
-
+      <b-form-group label="所在目录">
+				<b-breadcrumb :items="paths"></b-breadcrumb>
+      </b-form-group>
       <b-form-group label="选择文件">
 				<b-form-select v-model="selectedFile" :options="files" :select-size="4"></b-form-select>
       </b-form-group>
 
+      <b-form-group label="目录列表">
+				<treeselect
+					:options="fullfiles"
+					:disable-branch-nodes="true"
+					:load-options="loadFiles"
+					:show-count="true"
+					placeholder="请选择具体的文件"
+					v-model="fullfile"
+				/>
+			</b-form-group>
       <b-button type="submit" variant="primary">确定</b-button>
       <b-button type="reset" variant="danger">Reset</b-button>
     </b-form>
 
   </div>
   <script>
+	Vue.component('treeselect', VueTreeselect.Treeselect);
 	var vapp = new Vue({
       el: '#app',
       data: {
         drives: [],
         selectedDrive: null,
+				paths: [],
         files: [],
-        selectedFile: null
+        selectedFile: null,
+        fullfiles: [],
+        fullfile: null
 			},
 			created: function () {
 				GetDrives().then((result) => {
@@ -50,15 +68,28 @@
 			},
 			watch: {
 				"selectedDrive": function (newVal, oldVal) {
+					this.paths[0] = {
+            text: newVal,
+            href: '#'
+          };
+					this.fullfiles = [{ id: newVal, label: newVal, children: [] }];
+					this.fullfile = newVal;
 					GetFiles(newVal).then((result) => {
 						console.log(result);
 						this.files = result;
+						this.files.forEach(function(item, idx) {
+							this.fullfiles[0].children.push({ id: item, label: item, children: null });
+						}, this);
+						console.log(this.fullfiles)
 					}, (result) => {
 						console.log(result)
 					})
 				}
 			},
 			methods: {
+				loadFiles: function (action, parentNode, callback) {
+
+				},
 				onSubmit: function(event) {
 					event.preventDefault();
 				},

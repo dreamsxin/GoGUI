@@ -89,7 +89,8 @@ func (m *msg) excel_diff(fileName1 string, fileName2 string, col1 int, col2 int)
 		return fmt.Sprintf("GetRows error %v, err is %+v", fileName2, err)
 	}
 
-	style, _ := fs1.NewStyle(`{"border":[{"type":"left","color":"000000","style":1},{"type":"top","color":"000000","style":1},{"type":"bottom","color":"000000","style":1},{"type":"right","color":"000000","style":1}],"fill":{"type":"pattern","color":["#ffeb00"],"pattern":1},"alignment":{"horizontal":"left","ident":1,"vertical":"center","wrap_text":true}}`)
+	style1, _ := fs1.NewStyle(`{"border":[{"type":"left","color":"000000","style":1},{"type":"top","color":"000000","style":1},{"type":"bottom","color":"000000","style":1},{"type":"right","color":"000000","style":1}],"fill":{"type":"pattern","color":["#ffeb00"],"pattern":1},"alignment":{"horizontal":"left","ident":1,"vertical":"center","wrap_text":true}}`)
+	style2, _ := fs2.NewStyle(`{"border":[{"type":"left","color":"000000","style":1},{"type":"top","color":"000000","style":1},{"type":"bottom","color":"000000","style":1},{"type":"right","color":"000000","style":1}],"fill":{"type":"pattern","color":["#ffeb00"],"pattern":1},"alignment":{"horizontal":"left","ident":1,"vertical":"center","wrap_text":true}}`)
 
 	for rindex, row1 := range rows1 {
 		if col1 >= len(row1) {
@@ -104,8 +105,8 @@ func (m *msg) excel_diff(fileName1 string, fileName2 string, col1 int, col2 int)
 				colName2, _ := excelize.ColumnNumberToName(col2 + 1)
 				log.Println("file1 ", colName1, fmt.Sprintf("%v%v", colName1, rindex+1))
 				log.Println("file2 ", colName2, fmt.Sprintf("%v%v", colName2, rindex2+1))
-				fs1.SetCellStyle("Sheet1", fmt.Sprintf("%v%v", colName1, rindex+1), fmt.Sprintf("%v%v", colName1, rindex+1), style)
-				fs2.SetCellStyle("Sheet1", fmt.Sprintf("%v%v", colName2, rindex2+1), fmt.Sprintf("%v%v", colName2, rindex2+1), style)
+				fs1.SetCellStyle("Sheet1", fmt.Sprintf("%v%v", colName1, rindex+1), fmt.Sprintf("%v%v", colName1, rindex+1), style1)
+				fs2.SetCellStyle("Sheet1", fmt.Sprintf("%v%v", colName2, rindex2+1), fmt.Sprintf("%v%v", colName2, rindex2+1), style2)
 			}
 		}
 	}
