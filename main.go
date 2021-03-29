@@ -3,6 +3,7 @@ package main
 import (
 	"embed"
 	"fmt"
+	"io/ioutil"
 	"log"
 	"net"
 	"net/http"
@@ -12,6 +13,7 @@ import (
 	"sync"
 
 	"github.com/360EntSecGroup-Skylar/excelize"
+	"github.com/shirou/gopsutil/disk"
 	"github.com/zserge/lorca"
 )
 
@@ -24,6 +26,35 @@ var fs embed.FS
 type msg struct {
 	sync.Mutex
 	text string
+}
+
+// GetDrives iterates through the alphabet to return a list of mounted drives
+func GetDrives() []string {
+	partitions, err := disk.Partitions(true)
+	if err != nil {
+		return nil
+	}
+	var list []string
+	for _, partition := range partitions {
+		log.Println(partition)
+		list = append(list, partition.Device)
+	}
+	return list
+}
+
+func GetFiles(dirname string) []string {
+
+	var list []string
+	files, err := ioutil.ReadDir("./")
+	if err != nil {
+		return nil
+	}
+	for _, f := range files {
+		log.Println(f)
+		list = append(list, f.Name())
+	}
+
+	return list
 }
 
 func (m *msg) msg_text() string {
@@ -62,11 +93,11 @@ func (m *msg) excel_diff(fileName1 string, fileName2 string, col1 int, col2 int)
 
 	for rindex, row1 := range rows1 {
 		if col1 >= len(row1) {
-			return fmt.Sprintf("主文件 %v 在 %v 行没有找到 %v 列", fileName1, rindex, col1)
+			continue
 		}
 		for rindex2, row2 := range rows2 {
 			if col2 >= len(row2) {
-				return fmt.Sprintf("主文件 %v 在 %v 行没有找到 %v 列", fileName2, rindex2, col2)
+				continue
 			}
 			if row1[col1] == row2[col2] {
 				colName1, _ := excelize.ColumnNumberToName(col1 + 1)
@@ -102,6 +133,8 @@ func main() {
 	ui.Bind("start", func() {
 		log.Println("UI is ready")
 	})
+	ui.Bind("GetDrives", GetDrives)
+	ui.Bind("GetFiles", GetFiles)
 
 	// Create and bind Go object to the UI
 	m := &msg{}

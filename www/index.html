@@ -5,13 +5,69 @@
 		<link rel="shortcut icon" href="favicon.png">
 
     <!-- Bootstrap CSS -->
-    <link rel="stylesheet" href="css/bootstrap.min.css">
+    <link rel="stylesheet" type="text/css" href="css/bootstrap.min.css">
+    <link rel="stylesheet" type="text/css" href="css/bootstrap-vue.min.css" />
 
     <script src="js/jquery-3.3.1.slim.min.js"></script>
     <script src="js/popper.min.js"></script>
-    <script src="js/bootstrap.min.js"></script>
+  <script src="js/vue.min.js"></script>
+  <script src="js/bootstrap-vue.min.js"></script>
+
+  <script src="js/bootstrap-vue-icons.min.js"></script>
 	</head>
-	<body onload=start()>
+	<body onload="start()">
+	<div class="container-fluid mt-2" id="app">
+		<b-form @submit="onSubmit" @reset="onReset">
+      <b-form-group label="选择磁盘">
+				<b-form-select v-model="selectedDrive" :options="drives"></b-form-select>
+      </b-form-group>
+
+      <b-form-group label="选择文件">
+				<b-form-select v-model="selectedFile" :options="files" :select-size="4"></b-form-select>
+      </b-form-group>
+
+      <b-button type="submit" variant="primary">确定</b-button>
+      <b-button type="reset" variant="danger">Reset</b-button>
+    </b-form>
+
+  </div>
+  <script>
+	var vapp = new Vue({
+      el: '#app',
+      data: {
+        drives: [],
+        selectedDrive: null,
+        files: [],
+        selectedFile: null
+			},
+			created: function () {
+				GetDrives().then((result) => {
+					console.log(result);
+					this.drives = result;
+				}, (result) => {
+					console.log(result)
+				})
+			},
+			watch: {
+				"selectedDrive": function (newVal, oldVal) {
+					GetFiles(newVal).then((result) => {
+						console.log(result);
+						this.files = result;
+					}, (result) => {
+						console.log(result)
+					})
+				}
+			},
+			methods: {
+				onSubmit: function(event) {
+					event.preventDefault();
+				},
+				onReset: function(event) {
+					event.preventDefault();
+				}
+			}
+  });
+  </script>
 	<div class="container-fluid mt-2">
 		<div class="row">
 			<div class="col">
@@ -47,13 +103,6 @@
 
 		<!-- Connect UI actions to Go functions -->
 		<script>
-			function getObjectURL(file) {
-				var reader = new FileReader();
-				reader.readAsDataURL(file);
-				reader.onloadend = function(e) {
-					alert(e.target.result);
-				}
-			}
 			$('#btn_submit').click(async () => {
 				var file1 = $('#file1').val();
 				var file2 = $('#file2').val();
