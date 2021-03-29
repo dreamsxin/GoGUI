@@ -61,22 +61,30 @@ func (m *msg) excel_diff(fileName1 string, fileName2 string, col1 int, col2 int)
 	style, _ := fs1.NewStyle(`{"border":[{"type":"left","color":"000000","style":1},{"type":"top","color":"000000","style":1},{"type":"bottom","color":"000000","style":1},{"type":"right","color":"000000","style":1}],"fill":{"type":"pattern","color":["#ffeb00"],"pattern":1},"alignment":{"horizontal":"left","ident":1,"vertical":"center","wrap_text":true}}`)
 
 	for rindex, row1 := range rows1 {
-		if (col1 >= len(row1)) {
+		if col1 >= len(row1) {
 			return fmt.Sprintf("主文件 %v 在 %v 行没有找到 %v 列", fileName1, rindex, col1)
 		}
 		for rindex2, row2 := range rows2 {
-			if (col2 >= len(row2)) {
+			if col2 >= len(row2) {
 				return fmt.Sprintf("主文件 %v 在 %v 行没有找到 %v 列", fileName2, rindex2, col2)
 			}
 			if row1[col1] == row2[col2] {
-				fs1.SetCellStyle("Sheet1", fmt.Sprintf("A%v", rindex+1), fmt.Sprintf("AA%v", rindex+1), style)
+				colName1, _ := excelize.ColumnNumberToName(col1 + 1)
+				colName2, _ := excelize.ColumnNumberToName(col2 + 1)
+				log.Println("file1 ", colName1, fmt.Sprintf("%v%v", colName1, rindex+1))
+				log.Println("file2 ", colName2, fmt.Sprintf("%v%v", colName2, rindex2+1))
+				fs1.SetCellStyle("Sheet1", fmt.Sprintf("%v%v", colName1, rindex+1), fmt.Sprintf("%v%v", colName1, rindex+1), style)
+				fs2.SetCellStyle("Sheet1", fmt.Sprintf("%v%v", colName2, rindex2+1), fmt.Sprintf("%v%v", colName2, rindex2+1), style)
 			}
 		}
 	}
 	if err := fs1.Save(); err != nil {
 		return fmt.Sprintf("更新文件 %s 发送错误 %b ", fileName1, err.Error())
 	}
-	return "更新完成";
+	if err := fs2.Save(); err != nil {
+		return fmt.Sprintf("更新文件 %s 发送错误 %b ", fileName2, err.Error())
+	}
+	return "更新完成"
 }
 
 func main() {
